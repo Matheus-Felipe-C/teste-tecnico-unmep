@@ -1,0 +1,25 @@
+{
+  "name": "teste-tecnico-unmep",
+  "version": "1.0.0",
+  "description": "Teste tecnico feito para a vaga de Dev Jr. na empresa UnMEP",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Matheus-Felipe-C/teste-tecnico-unmep.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Matheus-Felipe-C/teste-tecnico-unmep/issues"
+  },
+  "homepage": "https://github.com/Matheus-Felipe-C/teste-tecnico-unmep#readme",
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

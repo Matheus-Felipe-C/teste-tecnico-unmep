@@ -1,17 +1,10 @@
 import { RecordItem } from "./types";
 
 export function processData(data: RecordItem[]) {
-    let ignoredRecords = 0;
+    
+    const validRecords = filterValidRecords(data);
 
-    // Filtra registros invalidos (menor ou igual a 0)
-    const validRecords = data.filter((record) => {
-        if (record.minutes <= 0) {
-            ignoredRecords++;
-            return false;
-        }
-
-        return true;
-    });
+    const ignoredRecords = data.length - validRecords.length;
 
     // Calcula total por tarefa
     const taskMap = new Map<number, { taskName: string; totalMinutes: number }>();
@@ -36,7 +29,18 @@ export function processData(data: RecordItem[]) {
     }));
 
     return {
-        validRecords,
+        ignoredRecords,
         tasks
     }
+}
+
+function filterValidRecords(data: RecordItem[]) {
+    const validRecords = data.filter((record) => {
+        if (record.minutes <= 0) {
+            return false;
+        }
+        return true;
+    });
+
+    return validRecords;
 }

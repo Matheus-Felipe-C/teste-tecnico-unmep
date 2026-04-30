@@ -4,7 +4,7 @@ export interface RecordItem {
     taskId: number,
     taskName: string
     status: string,
-    minutes: string,
+    minutes: number,
 
 
 }

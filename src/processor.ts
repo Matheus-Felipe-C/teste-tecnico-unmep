@@ -1,4 +1,10 @@
-import { RecordItem } from "./types";
+import { RecordItem, TaskItem } from "./types";
+
+
+type TaskSummary = {
+    tasks: TaskItem[];
+    totalMinutes: number;
+}
 
 export function processData(data: RecordItem[]) {
 
@@ -6,15 +12,16 @@ export function processData(data: RecordItem[]) {
 
     const ignoredRecords = data.length - validRecords.length;
 
-    const tasks = calculateTotalTasks(validRecords); 
+    const { tasks, totalMinutes } = calculateTotalTasks(validRecords);
 
     return {
+        totalMinutes,
         tasks,
         ignoredRecords,
     }
 }
 
-function calculateTotalTasks(records: RecordItem[]) {
+function calculateTotalTasks(records: RecordItem[]): TaskSummary {
     const taskMap = new Map<number, { taskName: string; totalMinutes: number }>();
 
     for (const record of records) {
@@ -30,13 +37,20 @@ function calculateTotalTasks(records: RecordItem[]) {
         }
     }
 
-    const tasks = Array.from(taskMap.entries()).map(([taskId, data]) => ({
+    const totalMinutes = Array.from(taskMap.values())
+        .reduce((sum, task) => sum + task.totalMinutes, 0);
+    
+    const tasks: TaskItem[] = Array.from(taskMap.entries()).map(([taskId, data]) => ({
         taskId,
         taskName: data.taskName,
         totalMinutes: data.totalMinutes,
+        percentage: ((data.totalMinutes / totalMinutes) * 100).toFixed(2) + '%',
     }));
 
-    return tasks;
+    return {
+        tasks,
+        totalMinutes
+    };
 }
 
 function filterValidRecords(data: RecordItem[]) {

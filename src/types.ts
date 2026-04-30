@@ -18,5 +18,7 @@ export interface TaskItem {
 export interface EmployeeItem {
     userId: number,
     userName: string,
-    totalMinutes: number
+    totalMinutes: number,
+    distinctTasks: number,
+    taskIds: number[]
 }

@@ -14,7 +14,8 @@ export function processData(data: RecordItem[]) {
     const mostWorkedTask = top3TasksPercentage.slice(0, 1);
 
     const employees = getEmployees(validRecords);
-    const top3Employees = employees.slice(0,3);
+    const top3Employees = getTop3Employees(employees);
+    const mostDistinctUserOnTasks = getEmployeeWIthMostDistinctTasks(employees);
 
     return {
         totalMinutes,
@@ -22,6 +23,7 @@ export function processData(data: RecordItem[]) {
         mostWorkedTask,
         top3TasksPercentage,
         top3Employees,
+        mostDistinctUserOnTasks,
         ignoredRecords,
     }
 }
@@ -70,27 +72,49 @@ function getTop3Tasks(tasks: TaskItem[]) {
 }
 
 function getEmployees(records: RecordItem[]): EmployeeItem[] {
-    const employeeMap = new Map<number, { userName: string; totalMinutes: number }>();
+    const employeeMap = new Map<number, { userName: string; totalMinutes: number, taskIds: Set<number> }>();
 
     for (const record of records) {
         const existing = employeeMap.get(record.userId);
 
-        existing ? existing.totalMinutes += record.minutes : employeeMap.set(record.userId, {
-            totalMinutes: record.minutes,
-            userName: record.userName,
-        });
+        if (existing) {
+            existing.totalMinutes += record.minutes;
+            existing.taskIds.add(record.taskId);
+        } else {
+            employeeMap.set(record.userId, {
+                totalMinutes: record.minutes,
+                userName: record.userName,
+                taskIds: new Set([record.taskId]),
+            });
+        }
     }
 
     const totalMinutes = Array.from(employeeMap.values())
         .reduce((sum, employee) => sum + employee.totalMinutes, 0);
 
-    const employees: EmployeeItem[] = Array.from(employeeMap.entries()).map(([ userId, data]) => ({
+    const employees: EmployeeItem[] = Array.from(employeeMap.entries()).map(([userId, data]) => ({
         userId,
         userName: data.userName,
         totalMinutes: data.totalMinutes,
+        distinctTasks: data.taskIds.size,
+        taskIds: Array.from(data.taskIds).sort(((a,b) => a - b))
     })).sort((a, b) => b.totalMinutes - a.totalMinutes || a.userId - b.userId);
 
     return employees;
+}
+
+function getTop3Employees(employees: EmployeeItem[]) {
+    return employees.slice(0, 3)
+        .map(({ userId, userName, totalMinutes }) => ({
+            userId,
+            userName,
+            totalMinutes,
+        }));
+}
+
+function getEmployeeWIthMostDistinctTasks(employees: EmployeeItem[]) {
+    return employees.sort((a, b) => b.distinctTasks - a.distinctTasks || a.userId - b.userId)
+        .slice(0,1);
 }
 
 function filterValidRecords(data: RecordItem[]) {

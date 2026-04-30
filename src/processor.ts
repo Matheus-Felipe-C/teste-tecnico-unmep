@@ -14,9 +14,15 @@ export function processData(data: RecordItem[]) {
 
     const { tasks, totalMinutes } = calculateTotalTasks(validRecords);
 
+    const top3TasksPercentage = getTop3Tasks(tasks);
+
+    const mostWorkedTask = top3TasksPercentage.slice(0, 1);
+
     return {
         totalMinutes,
         tasks,
+        mostWorkedTask,
+        top3TasksPercentage,
         ignoredRecords,
     }
 }
@@ -39,18 +45,29 @@ function calculateTotalTasks(records: RecordItem[]): TaskSummary {
 
     const totalMinutes = Array.from(taskMap.values())
         .reduce((sum, task) => sum + task.totalMinutes, 0);
-    
+
     const tasks: TaskItem[] = Array.from(taskMap.entries()).map(([taskId, data]) => ({
         taskId,
         taskName: data.taskName,
         totalMinutes: data.totalMinutes,
         percentage: ((data.totalMinutes / totalMinutes) * 100).toFixed(2) + '%',
-    }));
+    })).sort((a, b) => b.totalMinutes - a.totalMinutes || a.taskId - b.taskId);
 
     return {
         tasks,
         totalMinutes
     };
+}
+
+function getTop3Tasks(tasks: TaskItem[]) {
+    const topTasks = tasks.slice(0, 3)
+        .map(({ taskId, taskName, percentage }) => ({
+            taskId,
+            taskName,
+            percentage,
+        }));
+    
+    return topTasks;
 }
 
 function filterValidRecords(data: RecordItem[]) {

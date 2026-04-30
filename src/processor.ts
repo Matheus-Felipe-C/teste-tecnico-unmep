@@ -1,15 +1,23 @@
 import { RecordItem } from "./types";
 
 export function processData(data: RecordItem[]) {
-    
+
     const validRecords = filterValidRecords(data);
 
     const ignoredRecords = data.length - validRecords.length;
 
-    // Calcula total por tarefa
+    const tasks = calculateTotalTasks(validRecords); 
+
+    return {
+        tasks,
+        ignoredRecords,
+    }
+}
+
+function calculateTotalTasks(records: RecordItem[]) {
     const taskMap = new Map<number, { taskName: string; totalMinutes: number }>();
 
-    for (const record of validRecords) {
+    for (const record of records) {
         const existing = taskMap.get(record.taskId);
 
         if (existing) {
@@ -28,10 +36,7 @@ export function processData(data: RecordItem[]) {
         totalMinutes: data.totalMinutes,
     }));
 
-    return {
-        ignoredRecords,
-        tasks
-    }
+    return tasks;
 }
 
 function filterValidRecords(data: RecordItem[]) {

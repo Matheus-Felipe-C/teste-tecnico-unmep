@@ -6,7 +6,6 @@ export interface RecordItem {
     status: string,
     minutes: number,
 
-
 }
 
 export interface TaskItem {

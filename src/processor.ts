@@ -1,4 +1,4 @@
-import { RecordItem, TaskItem } from "./types";
+import { EmployeeItem, RecordItem, TaskItem } from "./types";
 
 
 type TaskSummary = {
@@ -7,22 +7,21 @@ type TaskSummary = {
 }
 
 export function processData(data: RecordItem[]) {
-
     const validRecords = filterValidRecords(data);
-
     const ignoredRecords = data.length - validRecords.length;
-
     const { tasks, totalMinutes } = calculateTotalTasks(validRecords);
-
     const top3TasksPercentage = getTop3Tasks(tasks);
-
     const mostWorkedTask = top3TasksPercentage.slice(0, 1);
+
+    const employees = getEmployees(validRecords);
+    const top3Employees = employees.slice(0,3);
 
     return {
         totalMinutes,
         tasks,
         mostWorkedTask,
         top3TasksPercentage,
+        top3Employees,
         ignoredRecords,
     }
 }
@@ -66,8 +65,32 @@ function getTop3Tasks(tasks: TaskItem[]) {
             taskName,
             percentage,
         }));
-    
+
     return topTasks;
+}
+
+function getEmployees(records: RecordItem[]): EmployeeItem[] {
+    const employeeMap = new Map<number, { userName: string; totalMinutes: number }>();
+
+    for (const record of records) {
+        const existing = employeeMap.get(record.userId);
+
+        existing ? existing.totalMinutes += record.minutes : employeeMap.set(record.userId, {
+            totalMinutes: record.minutes,
+            userName: record.userName,
+        });
+    }
+
+    const totalMinutes = Array.from(employeeMap.values())
+        .reduce((sum, employee) => sum + employee.totalMinutes, 0);
+
+    const employees: EmployeeItem[] = Array.from(employeeMap.entries()).map(([ userId, data]) => ({
+        userId,
+        userName: data.userName,
+        totalMinutes: data.totalMinutes,
+    })).sort((a, b) => b.totalMinutes - a.totalMinutes || a.userId - b.userId);
+
+    return employees;
 }
 
 function filterValidRecords(data: RecordItem[]) {

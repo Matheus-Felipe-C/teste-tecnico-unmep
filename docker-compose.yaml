@@ -2,3 +2,7 @@ services:
   app:
     build: .
     container_name: unmep-test
+    volumes:
+      - type: bind
+        source: ./output.json
+        target: /app/output.json

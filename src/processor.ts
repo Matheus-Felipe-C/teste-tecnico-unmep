@@ -30,6 +30,7 @@ export function processData(data: RecordItem[]) {
 
 function calculateTotalTasks(records: RecordItem[]): TaskSummary {
     const taskMap = new Map<number, { taskName: string; totalMinutes: number }>();
+    let totalMinutes = 0;
 
     for (const record of records) {
         const existing = taskMap.get(record.taskId);
@@ -42,10 +43,9 @@ function calculateTotalTasks(records: RecordItem[]): TaskSummary {
                 taskName: record.taskName,
             });
         }
-    }
 
-    const totalMinutes = Array.from(taskMap.values())
-        .reduce((sum, task) => sum + task.totalMinutes, 0);
+        totalMinutes += record.minutes;
+    }
 
     const tasks: TaskItem[] = Array.from(taskMap.entries()).map(([taskId, data]) => ({
         taskId,
@@ -73,6 +73,7 @@ function getTop3Tasks(tasks: TaskItem[]) {
 
 function getEmployees(records: RecordItem[]): EmployeeItem[] {
     const employeeMap = new Map<number, { userName: string; totalMinutes: number, taskIds: Set<number> }>();
+    let totalMinutes = 0;
 
     for (const record of records) {
         const existing = employeeMap.get(record.userId);
@@ -87,10 +88,9 @@ function getEmployees(records: RecordItem[]): EmployeeItem[] {
                 taskIds: new Set([record.taskId]),
             });
         }
-    }
 
-    const totalMinutes = Array.from(employeeMap.values())
-        .reduce((sum, employee) => sum + employee.totalMinutes, 0);
+        totalMinutes += record.minutes;
+    }
 
     const employees: EmployeeItem[] = Array.from(employeeMap.entries()).map(([userId, data]) => ({
         userId,

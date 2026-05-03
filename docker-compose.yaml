@@ -4,5 +4,5 @@ services:
     container_name: unmep-test
     volumes:
       - type: bind
-        source: ./output.json
-        target: /app/output.json
+        source: ./result.json
+        target: /app/result.json
